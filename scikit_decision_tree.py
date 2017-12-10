@@ -42,8 +42,11 @@ from sklearn.tree import DecisionTreeClassifier
 tree = DecisionTreeClassifier(criterion='entropy', max_depth=3,random_state=0)
 tree.fit(X_train, y_train)
 X_combined = np.vstack((X_train, X_test))
-y_combined = np.vstack((y_train, y_test))
+y_combined = np.hstack((y_train, y_test))
 
+
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
 def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
 
     #setup marker generator and color map
