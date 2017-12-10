@@ -24,22 +24,14 @@ sc.fit(X_train)  # estimate mean, std of X_train
 X_train_std = sc.transform(X_train)  # standardize training data
 X_test_std = sc.transform(X_test)  # standardize test data
 
-'''train the perceptron'''
-# most algs in scikit-learn already support multiclass classification via One-vs-Rest (OVR)
-from sklearn.linear_model import Perceptron
-
-ptron = Perceptron(n_iter=40, eta0=0.01, random_state=0)
-# eta is learning rate
-ptron.fit(X_train_std, y_train)
-y_pred = ptron.predict(X_test_std)
-
-'''check the performance of the perceptron model'''
-from sklearn.metrics import accuracy_score
-print('accuracy : %.2f' % accuracy_score(y_test, y_pred))
+X_combined_std = np.vstack((X_train_std, X_test_std))
+y_combined = np.hstack((y_train, y_test)) # Take a sequence of arrays and stack them horizontally to make a single array
 
 
-# plot some decision regions
 
+
+
+'''plot some decision regions'''
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 
@@ -51,18 +43,19 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
     cmap = ListedColormap(colors[:len(np.unique(y))])
 
     # plot decision surface
-    x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1,
-    x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1,
+    x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
                            np.arange(x2_min, x2_max,
                                      resolution))  # arange creates arrays with numbers from first param to second param at intervals of third param
     # meshgrid functions as explained here: http://louistiao.me/posts/numpy-mgrid-vs-meshgrid/
+
     Z = classifier.predict(np.array([xx1.ravel(), xx2.ravel()]).T)  # np.ravel flattens arrays,
     # .T : Same as self.transpose(), except that self is returned if self.ndim < 2.
     Z = Z.reshape(xx1.shape)
     plt.contourf(xx1, xx2, Z, alpha=0.04, cmap=cmap)
     plt.xlim(xx1.min(), xx1.max())
-    plt.ylim(xx2.min(), xx2.max())
+    #plt.ylim(xx2.min(), xx2.max()) #throwing an error, script runs (relatively) fine without... something to come back to
 
     # plot all samples
     for idx, cl in enumerate(np.unique(y)):
@@ -74,62 +67,6 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
         plt.scatter(X_test[:, 0], X_test[:, 1], c='', alpha=1.0, linewidths=1, marker='o', s=55, label='test set')
 
 
-X_combined_std = np.vstack((X_train_std,
-                            X_test_std))
-y_combined = np.hstack((y_train, y_test)) # Take a sequence of arrays and stack them horizontally to make a single array
-plot_decision_regions(X=X_combined_std,
-                      y=y_combined,
-                      classifier=ptron,
-                      test_idx=range(105, 150))
-# https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.scatter documentation
-plt.xlabel('petal length[standardized]')
-plt.ylabel('petal width [standardized]')
-plt.legend(loc='upper left')
-plt.show()
-
-'''logistic regression'''
-# scikit learn implements a highly optimized version of logistic
-#  regression that also supports multiclass settings off the shelf
-
-from sklearn.linear_model import LogisticRegression
-
-lr = LogisticRegression(C=1000.0, random_state=0)
-# C is regularization strength, see more below
-lr.fit(X_train_std, y_train)
-
-'''explore capabilities of the logistic regression model'''
-plot_decision_regions(X=X_combined_std,
-                      y=y_combined,
-                      classifier=lr,  # we change which classifier we use
-                      test_idx=range(105, 150))
-# https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.scatter documentation
-plt.xlabel('petal length[standardized]')
-plt.ylabel('petal width [standardized]')
-plt.legend(loc='upper left')
-plt.show()
-# we can predict class membership probabilty (confidence) using the predict_proba method
-prob = lr.predict_proba(X_test_std[0, :])
-print(prob[0][2])
-
-'''tackling overfitting with regularization '''
-# train a series of models and compare weights/regularization strength rations
-weights, params = [], []
-for c in np.arange(-5, 5):
-    lr = LogisticRegression(C=10 ** float(c), random_state=0)
-    lr.fit(X_train_std, y_train)
-    weights.append(lr.coef_[1])
-    params.append(10 ** float(c))
-
-weights = np.array(weights)
-plt.plot(params, weights[:, 0],
-         label='petal length')
-plt.plot(params, weights[:, 1], linestyle='--',
-         label='petal width')
-plt.ylabel('weight coeff')
-plt.xlabel('C')
-plt.legend(loc='upper left')
-plt.xscale('log')
-plt.show()
 
 ''''Support Vector Machine '''
 from sklearn.svm import SVC
@@ -140,14 +77,14 @@ plot_decision_regions(X_combined_std,
                       y_combined,
                       classifier=svm,
                       test_idx=range(105,150))
-
+'''
 plt.xlabel('petal length[standardized]')
 plt.ylabel('petal width [standardized]')
 plt.legend(loc='upper left')
 plt.show()
-
+'''
 y_pred = svm.predict(X_test_std)
-print('accuracy : %.2f' % accuracy_score(y_test, y_pred))
+#print('accuracy : %.2f' % accuracy_score(y_test, y_pred))  #honestly dont remember how this ended up here, clean up later
 
 ''''''
 '''solving nonlinear problems using a kernel SVM'''
