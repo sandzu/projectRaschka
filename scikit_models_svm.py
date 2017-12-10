@@ -55,7 +55,7 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
     Z = Z.reshape(xx1.shape)
     plt.contourf(xx1, xx2, Z, alpha=0.04, cmap=cmap)
     plt.xlim(xx1.min(), xx1.max())
-    #plt.ylim(xx2.min(), xx2.max()) #throwing an error, script runs (relatively) fine without... something to come back to
+    #plt.ylim(xx2.min(), xx2.max()) #todo: throwing an error, script runs fine without... something to come back to
 
     # plot all samples
     for idx, cl in enumerate(np.unique(y)):
@@ -77,16 +77,16 @@ plot_decision_regions(X_combined_std,
                       y_combined,
                       classifier=svm,
                       test_idx=range(105,150))
-'''
+
 plt.xlabel('petal length[standardized]')
 plt.ylabel('petal width [standardized]')
 plt.legend(loc='upper left')
 plt.show()
-'''
-y_pred = svm.predict(X_test_std)
-#print('accuracy : %.2f' % accuracy_score(y_test, y_pred))  #honestly dont remember how this ended up here, clean up later
 
-''''''
+#y_pred = svm.predict(X_test_std) #TODO : SEE BELOW
+#print('accuracy : %.2f' % accuracy_score(y_test, y_pred))  #todo: honestly dont remember how this ended up here, clean up later
+
+
 '''solving nonlinear problems using a kernel SVM'''
 np.random.seed(0)
 X_xor = np.random.randn(200,2) #returns a 200 x 2 array with samples from the std normal distribution
