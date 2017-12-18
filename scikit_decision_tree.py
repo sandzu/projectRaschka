@@ -82,3 +82,44 @@ plt.xlabel('petal length[cm]')
 plt.ylabel('petal width [cm]')
 plt.legend(loc='upper left')
 plt.show()
+
+'''export decision tree as .dot file after training, use GraphViz to visualize'''
+
+from sklearn.tree import export_graphviz
+export_graphviz(tree, out_file = 'tree.dot', feature_names=['petal length', 'petal width'])
+
+'''combine weak and strong learners via random forests'''
+
+from sklearn.ensemble import RandomForestClassifier
+forest = RandomForestClassifier(criterion='entropy',
+                                n_estimators=10,
+                                random_state=1,
+                                n_jobs=2)
+forest.fit(X_train, y_train)
+plot_decision_regions(X_combined, y_combined, classifier=forest, test_idx=range(105,150))
+plt.xlabel('petal length[cm]')
+plt.ylabel('petal width [cm]')
+plt.legend(loc='upper left')
+plt.show()
+
+
+'''K nearest neighbors'''
+
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=5,
+                           p=2,
+                           metric='minkowski')
+
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler() #initialize new standardscaler object
+sc.fit(X_train) #estimate mean, std of X_train
+X_train_std = sc.transform(X_train) #standardize training data
+X_test_std = sc.transform(X_test)
+X_combined_std = np.vstack((X_train_std, X_test_std))
+
+knn.fit(X_train_std, y_train)
+
+plot_decision_regions(X_combined_std, y_combined, classifier=knn, test_idx=range(105,150))
+plt.xlabel('petal length [standardized]')
+plt.ylabel('petal width [standardized]')
+plt.show()
